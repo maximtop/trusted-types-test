@@ -33,6 +33,13 @@ const headers: Headers = {
             key: 'Content-Security-Policy',
             value: 'require-trusted-types-for \'script\''
         }
+    },
+    duplicates: {
+        id: 'duplicates',
+        cspHeader: {
+            key: 'Content-Security-Policy',
+            value: 'trusted-types one two AGPolicy \'allow-duplicates\''
+        }
     }
 }
 
@@ -100,6 +107,9 @@ const handleRequest = async (request: Request): Promise<Response> => {
         }
         case `/${headers.script.id}`: {
             return getResponse(headers.script);
+        }
+        case `/${headers.duplicates.id}`: {
+            return getResponse(headers.duplicates);
         }
         default:
             return new Response('404', { status: 404 });
