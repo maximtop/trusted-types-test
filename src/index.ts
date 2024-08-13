@@ -4,41 +4,60 @@ type Header = {
 }
 
 type HeaderData = {
-    id: string,
+    id: HeaderId,
     cspHeader: Header
 }
 
+enum HeaderId {
+    Default = 'default',
+    Adguard = 'adguard',
+    Script = 'script',
+    Duplicates = 'duplicates',
+    NoEval = 'no-eval',
+}
+
+enum HeaderKey {
+    ContentSecurityPolicy = 'Content-Security-Policy',
+}
+
 type Headers = {
-    [key: string]: HeaderData
+    [key in HeaderId]: HeaderData
 }
 
 const headers: Headers = {
-    default: {
-        id: 'default',
+    [HeaderId.Default]: {
+        id: HeaderId.Default,
         cspHeader: {
-            key: 'Content-Security-Policy',
+            key: HeaderKey.ContentSecurityPolicy,
             value: 'trusted-types one two default'
         },
     },
-    adguard: {
-        id: 'adguard',
+    [HeaderId.Adguard]: {
+        id: HeaderId.Adguard,
         cspHeader: {
-            key: 'Content-Security-Policy',
+            key: HeaderKey.ContentSecurityPolicy,
             value: 'trusted-types one two AGPolicy'
         },
     },
-    script: {
-        id: 'script',
+    [HeaderId.Script]: {
+        id: HeaderId.Script,
         cspHeader: {
-            key: 'Content-Security-Policy',
+            key: HeaderKey.ContentSecurityPolicy,
             value: 'require-trusted-types-for \'script\''
         }
     },
-    duplicates: {
-        id: 'duplicates',
+    [HeaderId.Duplicates]: {
+        id: HeaderId.Duplicates,
         cspHeader: {
-            key: 'Content-Security-Policy',
+            key: HeaderKey.ContentSecurityPolicy,
             value: 'trusted-types one two AGPolicy \'allow-duplicates\''
+        }
+    },
+    [HeaderId.NoEval]: {
+        id: HeaderId.NoEval,
+        cspHeader: {
+            key: HeaderKey.ContentSecurityPolicy,
+            value: 'default-src \'self\'; script-src \'self\' https://trusted-types-test.maximtop.workers.dev/; block-all-mixed-content; upgrade-insecure-requests;'
         }
     }
 }
@@ -99,17 +118,20 @@ const handleRequest = async (request: Request): Promise<Response> => {
                     'content-type': 'text/html;charset=UTF-8',
                 },
             });
-        case `/${headers.default.id}`: {
-            return getResponse(headers.default);
+        case `/${HeaderId.Default}`: {
+            return getResponse(headers[HeaderId.Default]);
         }
-        case `/${headers.adguard.id}`: {
-            return getResponse(headers.adguard);
+        case `/${HeaderId.Adguard}`: {
+            return getResponse(headers[HeaderId.Adguard]);
         }
-        case `/${headers.script.id}`: {
-            return getResponse(headers.script);
+        case `/${HeaderId.Script}`: {
+            return getResponse(headers[HeaderId.Script]);
         }
-        case `/${headers.duplicates.id}`: {
-            return getResponse(headers.duplicates);
+        case `/${HeaderId.Duplicates}`: {
+            return getResponse(headers[HeaderId.Duplicates]);
+        }
+        case `/${HeaderId.NoEval}`: {
+            return getResponse(headers[HeaderId.NoEval]);
         }
         default:
             return new Response('404', { status: 404 });
